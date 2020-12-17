@@ -11,36 +11,35 @@
 - Once AWS SSO is enabled, go to AWS SSO Settings page, under User portal, and choose Change. You can then provide your company’s name in order to get an easy portal URL: https://{company}.awsapps.com/start. You can only setup this subdomain once, no further changes are allowed, choose wisely.
 
 ## II. G Suite SAML App initialization and metadata recovery
-- For this step, head over to https://admin.google.com, select Apps and choose SAML apps
-- Add a new app by clicking the + button on the bottom right corner
-- Select Set up my own custom app from the list. Do not select Amazon Web Services from the list. This SAML app pre-configuration is make for AWS single account SSO via IAM federated roles. This is not what we are setting up here.
-- Download the IDP metadata to your computer as metadata.xml by clicking the DOWNLOAD link from the option 2 part of the popup.
-- Click Next
-- Keep this browser tab open, we will need to complete the application setup process in step IV.
+- Reference: https://support.google.com/a/answer/6087519
+- Step 1: Go to https://admin.google.com/
+- Step 2: Click on Apps > SAML Apps > Add App > Add Custom SAML app 
+- Step 3: App Details > App Name: AWS SSO
+- Step 4: Google Indentity Provider Details > Click On Option 1: Download IdP Metadata (GoogleIDPMetadata.xml) > Press Continue
+- Step 5: Service Provider Details > Add the following details
+```
+> ACS URL (actual):     https://ap-southeast-1.signin.aws.amazon.com/platform/saml/acs/55b77c17-630f-4cb2-ade9-8e398ee78bee
+> Entity Id (actual):   https://ap-southeast-1.signin.aws.amazon.com/platform/saml/d-96671afd19
+> Start URL (optional): https://wknc.awsapps.com/start
+> Signed Response:      Leave Unchecked
+> Named Id format:      Leave UNSPECIFIED
+> Name Id:              Leave Basic Information > Primary email
+```
+- Step 6: Attribute mapping > Add Mapping and Click on "Finish"
+- Step 7: User access > Click on "ON for everyone" > Click Save
 
 ## III. AWS SSO external IdP configuration with G Suite metadata and AWS metadata recovery
 - Open a new browser tab on AWS SSO console.
 - Go to the Settings page, under Identity source, and click Change on the Identity source line.
 - Choose External identity provider within the list of available identity providers.
-- Under Service provider metadata, click the Show individual metadata values button. Take a note of AWS SSO Sing-in URL, ACS URL and issuer URL. There are unfortunately no metadata upload feature available in Google admin for SAML application setup.
+- Under Service provider metadata, click the Show individual metadata values button. Take a note of AWS SSO Sign-in URL, ACS URL and issuer URL. There are unfortunately no metadata upload feature available in Google admin for SAML application setup.
 - Upload the metadata.xml file you downloaded earlier from Google admin page in the IdP SAML metadata field.
 - Choose Next: Review.
 - Once you have read the disclaimer and are ready to proceed, type CONFIRM.
 - Choose Finish.
+- AWS SSO-integrated applications > Enable in member accounts
 
-## IV. G Suite SAML App configuration with AWS metadata
-- Return to Google Admin tab of your browser
-- In the Service Provider details window, add Amazon Web Services as an application name and description.
-- Fill in AWS SSO ACS URL value from AWS in the ACS URL field.
-- Fill in AWS SSO issuer URL value from AWS in the Entity ID field.
-- Fill in AWS SSO Sing-in URL in the Start URL field.
-- Leave the Signed Response unchecked.
-- Leave the default Name ID as the primary email. This will be our unique identifier on AWS side.
-- Click Next.
-- Do not modify any Mapping in the Attribute Mapping section.
-- Click Finish.
-
-## V. AWS SSO users provisioning
+## IV. AWS SSO users provisioning
 - AWS SSO uses SCIM (System for Cross-domain Identity Management) to do automatic provisioning of users based on IdP information. Unfortunately, no SCIM option is exposed for G Suite IdP. This automatic provisioning method is mainly used for Azure Active Directory federated AWS SSO configuration.
 - Therefore, when setting up AWS SSO with G Suite accounts, you need to manually add user in AWS SSO interface. The management of user permission is also made from AWS SSO interface.
 - On your existing AWS SSO console browser tab, go to the Settings page, under Identity source, and check that Provisioning line shows Manual.
